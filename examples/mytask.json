@@ -1,0 +1,4 @@
+{
+  "files": ["bash_task_helper/files/task_helper.sh"],
+  "input_method": "environment"
+}
