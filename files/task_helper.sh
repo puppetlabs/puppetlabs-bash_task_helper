@@ -7,7 +7,7 @@ task-fail() {
   exit ${2:-1}
 }
 
-task-success() {
+task-succeed() {
   task-output "status" "success"
   if [ "$#" -gt 0 ]; then
     task-output "message" "$*"
