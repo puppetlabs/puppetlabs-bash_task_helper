@@ -62,7 +62,7 @@ _task-exit() {
   # Print JSON to stdout
   printf '{\n'
   printf '  %s' "$(printf "$_task_outputs")"
-  printf '%s\n' "\"merged_output\": \"$(task-json-escape < "$_merged_output")\""
+  printf '%s\n' "\"_output\": \"$(task-json-escape < "$_merged_output")\""
   printf '}\n'
 
   # Remove the output tempfile
