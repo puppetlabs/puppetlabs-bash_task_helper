@@ -62,11 +62,11 @@ _task-exit() {
   # Print JSON to stdout
   printf '{\n'
   printf '  %s' "$(printf "$_task_outputs")"
-  printf '%s\n' "\"_output\": \"$(task-json-escape < "$_merged_output")\""
+  printf '%s\n' "\"_output\": \"$(task-json-escape < "$_output_tmpfile")\""
   printf '}\n'
 
   # Remove the output tempfile
-  rm "$_merged_output"
+  rm "$_output_tmpfile"
 
   # Resume an orderly exit
   exit "$exit_code"
@@ -88,10 +88,10 @@ done
 
 # Redirect all output to a tempfile, and trap EXIT. Upon exit, print a Bolt
 # task return JSON string, with the full contents of the tempfile in the
-# "merged_output" key.
-_merged_output="$(mktemp)"
+# "_output" key.
+_output_tmpfile="$(mktemp)"
 trap _task-exit EXIT
 exec 3>&1
 exec 4>&2
-exec 1>> "$_merged_output"
-exec 2>> "$_merged_output"
+exec 1>> "$_output_tmpfile"
+exec 2>> "$_output_tmpfile"
