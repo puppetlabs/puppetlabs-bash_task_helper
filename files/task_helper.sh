@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
 # Exit with an error message and error code, defaulting to 1
-fail() {
-  helper-output "status" "error"
-  helper-output "message" "$1"
+task-fail() {
+  task-output "status" "error"
+  task-output "message" "$1"
   exit ${2:-1}
 }
 
-success() {
-  helper-output "status" "success"
+task-success() {
+  task-output "status" "success"
   if [ "$#" -gt 0 ]; then
-    helper-output "message" "$*"
+    task-output "message" "$*"
   fi
   exit 0
 }
 
 # No arguments. Use with a pipe or input redirect as a filter.
-json-escape() {
+task-json-escape() {
   # This is imperfect, and will miss some characters. If we can figure out a
   # way to get iconv to catch more character types, we might improve that.
   # 1. Replace backslashes with escape sequences
@@ -41,14 +41,14 @@ json-escape() {
     | tr -cd '\11\12\15\40-\176'
 }
 
-helper-output() {
+task-output() {
   local key="${1}"
-  local value=$(json-escape <<< "$2")
+  local value=$(task-json-escape <<< "$2")
   # TODO: ensure no duplicate values
-  _helper_outputs="${_helper_outputs}\"${key}\": \"${value%\\n}\",\n  "
+  _task_outputs="${_task_outputs}\"${key}\": \"${value%\\n}\",\n  "
 }
 
-_helper-exit() {
+_task-exit() {
   # Record the exit code
   local exit_code=$?
 
@@ -61,8 +61,8 @@ _helper-exit() {
 
   # Print JSON to stdout
   printf '{\n'
-  printf '  %s' "$(printf "$_helper_outputs")"
-  printf '%s\n' "\"merged_output\": \"$(json-escape < "$_merged_output")\""
+  printf '  %s' "$(printf "$_task_outputs")"
+  printf '%s\n' "\"merged_output\": \"$(task-json-escape < "$_merged_output")\""
   printf '}\n'
 
   # Remove the output tempfile
@@ -90,7 +90,7 @@ done
 # task return JSON string, with the full contents of the tempfile in the
 # "merged_output" key.
 _merged_output="$(mktemp)"
-trap _helper-exit EXIT
+trap _task-exit EXIT
 exec 3>&1
 exec 4>&2
 exec 1>> "$_merged_output"
