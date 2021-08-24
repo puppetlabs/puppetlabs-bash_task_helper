@@ -103,12 +103,12 @@ done
 _task_output_keys=()
 _task_output_values=()
 
-# Redirect all output to a tempfile, and trap EXIT. Upon exit, print a Bolt
-# task return JSON string, with the full contents of the tempfile in the
-# "_output" key.
+# Redirect all output (stdin, stderr) to a tempfile, and trap EXIT. Upon exit,
+# print a Bolt task return JSON string, with the full contents of the tempfile
+# in the "_output" key.
 _output_tmpfile="$(mktemp)"
 trap _task-exit EXIT
-exec 3>&1
-exec 4>&2
-exec 1>> "$_output_tmpfile"
-exec 2>> "$_output_tmpfile"
+exec 3>&1 \
+     4>&2 \
+     1>> "$_output_tmpfile" \
+     2>&1
