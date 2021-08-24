@@ -44,8 +44,19 @@ task-json-escape() {
 task-output() {
   local key="${1}"
   local value=$(task-json-escape <<< "$2")
-  # TODO: ensure no duplicate values
-  _task_outputs="${_task_outputs}\"${key}\": \"${value%\\n}\",\n  "
+
+  # Try to find an index for the key
+  for i in "${!_task_output_keys[@]}"; do
+    [[ "${_task_output_keys[$i]}" = "${key}" ]] && break
+  done
+
+  # If there's an index, set its value. Otherwise, add a new key
+  if [[ "${_task_output_keys[$i]}" = "${key}" ]]; then
+    _task_output_values[$i]="${value%\\n}"
+  else
+    _task_output_keys=("${_task_output_keys[@]}" "${key}")
+    _task_output_values=("${_task_output_values[@]}" "${value%\\n}")
+  fi
 }
 
 _task-exit() {
@@ -61,8 +72,10 @@ _task-exit() {
 
   # Print JSON to stdout
   printf '{\n'
-  printf '  %s' "$(printf "$_task_outputs")"
-  printf '%s\n' "\"_output\": \"$(task-json-escape < "$_output_tmpfile")\""
+  for i in "${!_task_output_keys[@]}"; do
+    printf '  "%s": "%s",\n' "${_task_output_keys[$i]}" "${_task_output_values[$i]}"
+  done
+  printf '  "_output": "%s"\n' "$(task-json-escape < "$_output_tmpfile")"
   printf '}\n'
 
   # Remove the output tempfile
@@ -85,6 +98,10 @@ fi
 for v in ${!PT_*}; do
   declare "${v#*PT_}"="${!v}"
 done
+
+# Set up variables to record task outputs
+_task_output_keys=()
+_task_output_values=()
 
 # Redirect all output to a tempfile, and trap EXIT. Upon exit, print a Bolt
 # task return JSON string, with the full contents of the tempfile in the
