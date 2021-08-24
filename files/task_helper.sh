@@ -1,21 +1,86 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Exit with an error message and error code, defaulting to 1
+# Public: Set status=error, set a message, and exit the task
+#
+# This function ends the task. The task will return as failed. The function
+# accepts an argument to set the task's return message, and an optional exit
+# code to use.
+#
+# $1 - Message. A text string message to return in the task's `message` key.
+# $2 - Exit code. A non-zero integer to use as the task's exit code.
+#
+# Examples
+#
+#   task-fail
+#   task-fail "task failed because of reasons"
+#   task-fail "task failed because of reasons" "127"
+#
 task-fail() {
   task-output "status" "error"
-  task-output "message" "$1"
+  task-output "message" "${1:(no message given)}"
   exit ${2:-1}
 }
 
+# Public: Set status=success, set a message, and exit the task
+#
+# This function ends the task. The task will return as successful. The function
+# accepts an argument to set the task's return message.
+#
+# $1 - Message. A text string message to return in the task's `message` key.
+#
+# Examples
+#
+#   task-succeed
+#   task-succeed "task completed successfully"
+#
 task-succeed() {
   task-output "status" "success"
-  if [ "$#" -gt 0 ]; then
-    task-output "message" "$*"
-  fi
+  task-output "message" "${1:(no message given)}"
   exit 0
 }
 
-# No arguments. Use with a pipe or input redirect as a filter.
+# Public: Set a task output key to a string value
+#
+# Takes a key argument and a value argument, and ensures that upon task exit
+# the key and value will be returned as part of the task output.
+#
+# $1 - Output key. Should contain only characters that match [A-Za-z0-9-_]
+# $2 - Output value. Should be a string. Will be json-escaped.
+#
+# Examples
+#
+#   task-output "message" "an armadilo crossed the street"
+#   task-output "maximum" "100"
+#
+task-output() {
+  local key="${1}"
+  local value=$(echo -n "$2" | task-json-escape)
+
+  # Try to find an index for the key
+  for i in "${!_task_output_keys[@]}"; do
+    [[ "${_task_output_keys[$i]}" = "${key}" ]] && break
+  done
+
+  # If there's an index, set its value. Otherwise, add a new key
+  if [[ "${_task_output_keys[$i]}" = "${key}" ]]; then
+    _task_output_values[$i]="${value}"
+  else
+    _task_output_keys=("${_task_output_keys[@]}" "${key}")
+    _task_output_values=("${_task_output_values[@]}" "${value}")
+  fi
+}
+
+# Public: read text on stdin and output the text json-escaped
+#
+# A filter command which does its best to json-escape text input. Because the
+# function is constrained to rely only on lowest-common-denominator posix
+# utilities, it may not be able to fully escape all text on all platforms.
+#
+# Examples
+#
+#   printf "a string\nwith newlines\n" | task-json-escape
+#   task-json-escape < file.txt
+#
 task-json-escape() {
   # This is imperfect, and will miss some characters. If we can figure out a
   # way to get iconv to catch more character types, we might improve that.
@@ -41,24 +106,17 @@ task-json-escape() {
     | tr -cd '\11\12\15\40-\176'
 }
 
-task-output() {
-  local key="${1}"
-  local value=$(task-json-escape <<< "$2")
-
-  # Try to find an index for the key
-  for i in "${!_task_output_keys[@]}"; do
-    [[ "${_task_output_keys[$i]}" = "${key}" ]] && break
-  done
-
-  # If there's an index, set its value. Otherwise, add a new key
-  if [[ "${_task_output_keys[$i]}" = "${key}" ]]; then
-    _task_output_values[$i]="${value%\\n}"
-  else
-    _task_output_keys=("${_task_output_keys[@]}" "${key}")
-    _task_output_values=("${_task_output_values[@]}" "${value%\\n}")
-  fi
-}
-
+# Private: Print json task return data on task exit
+#
+# This function is called by a task helper EXIT trap. It will print json task
+# return data on task termination.  The return data will include all output
+# keys set using task-output, and all uncaptured stdout/stderr output produced
+# by the script. This function should not be directly invoked.
+#
+# Examples
+#
+#   _task-exit
+#
 _task-exit() {
   # Record the exit code
   local exit_code=$?
