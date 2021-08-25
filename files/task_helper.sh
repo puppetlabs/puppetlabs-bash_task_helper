@@ -1,4 +1,32 @@
 #!/bin/bash
+#=============================================================================
+# Bash Task Helper
+#
+# This helper allows shell script authors to easily write Bolt tasks which
+# return useful output, including success, failure, and key-value return data.
+#
+#   1. Set your script shebang line to bash
+#   2. Source this script in the second line of your task
+#   3. For a task parameter "input", you may reference its value using ${input}
+#   4. Use `task-output "key" "value"` to set return data strings
+#   5. Use `task-succeed "message"`, or `task-fail "message"` to end the task
+#   6. Consumers MUST NOT use or redirect reserved file descriptors 6 and 7
+#   7. Consumers MUST NOT trap EXIT
+#
+# Examples:
+#
+#   #!/bin/bash
+#   source "$(dirname $0)/../../bash_task_helper/files/task_helper.sh"
+#
+#   echo "this output will be visible, but not set any key-value data"
+#
+#   VAR=$(date)
+#   task-output "timestamp" "${VAR}"
+#
+#   task-succeed "demonstration task successful"
+#
+#=============================================================================
+
 
 # Public: Set status=error, set a message, and exit the task
 #
@@ -17,7 +45,7 @@
 #
 task-fail() {
   task-output "status" "error"
-  task-output "message" "${1:(no message given)}"
+  task-output "message" "${1:-(no message given)}"
   exit ${2:-1}
 }
 
@@ -35,7 +63,7 @@ task-fail() {
 #
 task-succeed() {
   task-output "status" "success"
-  task-output "message" "${1:(no message given)}"
+  task-output "message" "${1:-(no message given)}"
   exit 0
 }
 
@@ -125,8 +153,8 @@ _task-exit() {
   trap - EXIT
 
   # Reset outputs
-  exec 1>&3
-  exec 2>&4
+  exec 1>&6
+  exec 2>&7
 
   # Print JSON to stdout
   printf '{\n'
@@ -164,9 +192,13 @@ _task_output_values=()
 # Redirect all output (stdin, stderr) to a tempfile, and trap EXIT. Upon exit,
 # print a Bolt task return JSON string, with the full contents of the tempfile
 # in the "_output" key.
+#
+# Note: file descriptors 6 and 7 are used to save original stdout/stderr. These
+#       were chosen as the file descriptors least likely to be used by shell
+#       script task authors. Client scripts MUST NOT use these descriptors.
 _output_tmpfile="$(mktemp)"
 trap _task-exit EXIT
-exec 3>&1 \
-     4>&2 \
+exec 6>&1 \
+     7>&2 \
      1>> "$_output_tmpfile" \
      2>&1
