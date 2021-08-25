@@ -13,6 +13,16 @@
 #   6. Consumers MUST NOT use or redirect reserved file descriptors 6 and 7
 #   7. Consumers MUST NOT trap EXIT
 #
+# Output:
+#
+# If the script exits with a non-zero exit code, or calls task-fail, all output
+# will be returned to Bolt, including any keys set by `task-output`, and the
+# message given to `task-fail` (if given).
+#
+# If the script exits successfully, or if task-succeed is called, no output
+# will be returned except output specifically designated by the user via
+# `task-output` and/or `task-succeed` function calls.
+#
 # Examples:
 #
 #   #!/bin/bash
@@ -45,7 +55,7 @@
 #
 task-fail() {
   task-output "status" "error"
-  task-output "message" "${1:-(no message given)}"
+  _task_exit_string="$1"
   exit ${2:-1}
 }
 
@@ -63,7 +73,7 @@ task-fail() {
 #
 task-succeed() {
   task-output "status" "success"
-  task-output "message" "${1:-(no message given)}"
+  _task_exit_string="$1"
   exit 0
 }
 
@@ -148,9 +158,25 @@ task-json-escape() {
 _task-exit() {
   # Record the exit code
   local exit_code=$?
+  local output
 
   # Unset the trap
   trap - EXIT
+
+  # If appropriate, set an _output value. By default, if the task is
+  # successful, full script output is suppressed. If the user passed a message
+  # to task-succeed, that will still be returned as _output. If the task does
+  # not exit successfully, or if the task is running in verbose mode, then full
+  # output is returned (including a task-fail user message, if there is one)
+  # TODO: implement a verbose option
+  if [ "$exit_code" -ne 0 ]; then
+    # Print the exit string, then set _output to everything that the script has printed
+    echo -n "$_task_exit_string"
+    task-output '_output' "$(cat "${_output_tmpfile}")"
+  elif [ ! -z "$_task_exit_string" ]; then
+    # Set _output to just the exit string
+    task-output '_output' "${_task_exit_string}"
+  fi
 
   # Reset outputs
   exec 1>&6
@@ -159,9 +185,13 @@ _task-exit() {
   # Print JSON to stdout
   printf '{\n'
   for i in "${!_task_output_keys[@]}"; do
-    printf '  "%s": "%s",\n' "${_task_output_keys[$i]}" "${_task_output_values[$i]}"
+    # Print each key-value pair
+    printf '  "%s": "%s"' "${_task_output_keys[$i]}" "${_task_output_values[$i]}"
+    # Print a comma unless it's the last key-value
+    [ ! "$(($i + 1))" -eq "${#_task_output_keys[@]}" ] && printf ','
+    # Print a newline
+    printf '\n'
   done
-  printf '  "_output": "%s"\n' "$(task-json-escape < "$_output_tmpfile")"
   printf '}\n'
 
   # Remove the output tempfile
@@ -188,6 +218,7 @@ done
 # Set up variables to record task outputs
 _task_output_keys=()
 _task_output_values=()
+_task_exit_string=''
 
 # Redirect all output (stdin, stderr) to a tempfile, and trap EXIT. Upon exit,
 # print a Bolt task return JSON string, with the full contents of the tempfile
