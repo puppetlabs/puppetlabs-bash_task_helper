@@ -5,13 +5,15 @@
 # This helper allows shell script authors to easily write Bolt tasks which
 # return useful output, including success, failure, and key-value return data.
 #
-#   1. Set your script shebang line to bash
-#   2. Source this script in the second line of your task
-#   3. For a task parameter "input", you may reference its value using ${input}
-#   4. Use `task-output "key" "value"` to set return data strings
-#   5. Use `task-succeed "message"`, or `task-fail "message"` to end the task
-#   6. Consumers MUST NOT use or redirect reserved file descriptors 6 and 7
-#   7. Consumers MUST NOT trap EXIT
+#   - Set your script shebang line to bash
+#   - Source this script in the second line of your task
+#   - For a task parameter "input", you may reference its value using ${input}
+#   - Use `task-output "key" "value"` to set return data strings
+#   - Use `task-succeed "message"`, or `task-fail "message"` to end the task
+#   - Consumers MUST NOT use or redirect reserved file descriptors 6 and 7
+#   - Consumers MUST NOT trap EXIT
+#   - When debugging, optionally call `task-verbose-output` before exiting. It
+#     is recommended only to use this function call when debugging.
 #
 # Output:
 #
@@ -108,6 +110,22 @@ task-output() {
   fi
 }
 
+# Public: Set the task to always return full output
+#
+# Tasks normally do not return all output if the task returns successfully. If
+# this function is invoked, the task will return all output regardless of exit
+# code.
+#
+# $1 - true or false. Defaults to true. Pass false to turn verbose output off.
+#
+# Examples
+#
+#   task-verbose-output
+#
+task-verbose-output() {
+  _task_verbose_output=${1:-true}
+}
+
 # Public: read text on stdin and output the text json-escaped
 #
 # A filter command which does its best to json-escape text input. Because the
@@ -168,8 +186,7 @@ _task-exit() {
   # to task-succeed, that will still be returned as _output. If the task does
   # not exit successfully, or if the task is running in verbose mode, then full
   # output is returned (including a task-fail user message, if there is one)
-  # TODO: implement a verbose option
-  if [ "$exit_code" -ne 0 ]; then
+  if [ "$exit_code" -ne 0 -o "$_task_verbose_output" = 'true' ]; then
     # Print the exit string, then set _output to everything that the script has printed
     echo -n "$_task_exit_string"
     task-output '_output' "$(cat "${_output_tmpfile}")"
@@ -219,6 +236,7 @@ done
 _task_output_keys=()
 _task_output_values=()
 _task_exit_string=''
+_task_verbose_output=false
 
 # Redirect all output (stdin, stderr) to a tempfile, and trap EXIT. Upon exit,
 # print a Bolt task return JSON string, with the full contents of the tempfile
