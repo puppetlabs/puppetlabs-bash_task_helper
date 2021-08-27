@@ -61,6 +61,12 @@ task-fail() {
   exit ${2:-1}
 }
 
+# DEPRECATED
+fail() {
+  task-output "_deprecation_warning" "WARN: bash_task_helper fail() is deprecated. Please use task-fail() instead."
+  task-fail "$@"
+}
+
 # Public: Set status=success, set a message, and exit the task
 #
 # This function ends the task. The task will return as successful. The function
@@ -77,6 +83,12 @@ task-succeed() {
   task-output "status" "success"
   _task_exit_string="$1"
   exit 0
+}
+
+# DEPRECATED
+success() {
+  task-output "_deprecation_warning" "WARN: bash_task_helper: use of success() is deprecated. Please use task-succeed() instead."
+  task-succeed "$@"
 }
 
 # Public: Set a task output key to a string value
