@@ -10,8 +10,12 @@
 #   - For a task parameter "input", you may reference its value using ${input}
 #   - Use `task-output "key" "value"` to set return data strings
 #   - Use `task-succeed "message"`, or `task-fail "message"` to end the task
-#   - Consumers MUST NOT use or redirect reserved file descriptors 6 and 7
-#   - Consumers MUST NOT trap EXIT
+#   - The task helper reserves two file descriptors in order to manage and
+#     process script output into valid task JSON. Consumers MUST NOT use or
+#     redirect the reserved file descriptors 6 and 7.
+#   - The task helper sets up a default EXIT trap. If consumers trap EXIT
+#     themselves, they MUST call `task-exit` at the end of their trap to trigger
+#     the helper's output finalization routine.
 #   - When debugging, optionally call `task-verbose-output` before exiting. It
 #     is recommended only to use this function call when debugging.
 #
@@ -58,7 +62,7 @@
 task-fail() {
   task-output "status" "error"
   _task_exit_string="$1"
-  exit ${2:-1}
+  task-exit ${2:-1}
 }
 
 # DEPRECATED
@@ -82,7 +86,7 @@ fail() {
 task-succeed() {
   task-output "status" "success"
   _task_exit_string="$1"
-  exit 0
+  task-exit 0
 }
 
 # DEPRECATED
@@ -174,20 +178,24 @@ task-json-escape() {
     | tr -cd '\11\12\15\40-\176'
 }
 
-# Private: Print json task return data on task exit
+# Public: Print json task return data on task exit
 #
 # This function is called by a task helper EXIT trap. It will print json task
 # return data on task termination.  The return data will include all output
 # keys set using task-output, and all uncaptured stdout/stderr output produced
-# by the script. This function should not be directly invoked.
+# by the script. This function should not be directly invoked, except inside a
+# user-created EXIT trap.
+#
+# $1 - Exit code to terminate script with. Defaults to $?.
 #
 # Examples
 #
-#   _task-exit
+#   task-exit
+#   task-exit 1
 #
-_task-exit() {
+task-exit() {
   # Record the exit code
-  local exit_code=$?
+  local exit_code=${1:-$?}
   local output
 
   # Unset the trap
@@ -258,7 +266,7 @@ _task_verbose_output=false
 #       were chosen as the file descriptors least likely to be used by shell
 #       script task authors. Client scripts MUST NOT use these descriptors.
 _output_tmpfile="$(mktemp)"
-trap _task-exit EXIT
+trap task-exit EXIT
 exec 6>&1 \
      7>&2 \
      1>> "$_output_tmpfile" \
