@@ -1,5 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+# shellcheck disable=SC1090
+# This is disabled in CI, but we'll disable it here as well
 declare PT__installdir
 source "$PT__installdir/bash_task_helper/files/task_helper.sh"
 
