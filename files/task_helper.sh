@@ -6,8 +6,8 @@
 fail() {
   # Print a stderr: entry if there were anything printed to stderr
   if [[ -s $_tmp ]]; then
-    # Hack to try and output valid json by replacing newlines with spaces.
-    echo "{ \"status\": \"error\", \"message\": \"$1\", \"stderr\": \"$(tr '\n' ' ' <$_tmp)\" }"
+    # Hack to try and output valid json by replacing " with \" and removing unprintable characters.
+    echo "{ \"status\": \"error\", \"message\": \"$1\", \"stderr\": \"$(sed 's/"/\\"/g' "$_tmp" | tr -cd '[:print:]')\" }"
   else
     echo "{ \"status\": \"error\", \"message\": \"$1\" }"
   fi
