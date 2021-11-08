@@ -1,8 +1,24 @@
-# This file can be used to customize the files managed by PDK.
-#
-# See https://github.com/puppetlabs/pdk-templates/blob/main/README.md
-# for more information.
-#
-# See https://github.com/puppetlabs/pdk-templates/blob/main/config_defaults.yml
-# for the default values.
---- {}
+---
+common:
+
+".gitlab-ci.yml":
+  delete: true
+appveyor.yml:
+  delete: true
+.gitpod.Dockerfile:
+  unmanaged: true
+.gitpod.yml:
+  unmanaged: true
+.github/workflows/nightly.yml:
+  unmanaged: true
+.github/workflows/pr_test.yml:
+  unmanaged: true
+.github/workflows/auto_release.yml:
+  unmanaged: true
+.github/workflows/spec.yml:
+  checks: 'syntax lint metadata_lint check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop'
+  unmanaged: true
+.github/workflows/release.yml:
+  unmanaged: true
+.travis.yml:
+  delete: true

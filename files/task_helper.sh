@@ -1,6 +1,4 @@
-#!/bin/bash
-
-# TODO: helper task?
+#!/usr/bin/env bash
 
 # Exit with an error message and error code, defaulting to 1
 fail() {
@@ -21,12 +19,19 @@ success() {
 }
 
 # Test for colors. If unavailable, unset variables are ok
+# shellcheck disable=SC2034
 if tput colors &>/dev/null; then
   green="$(tput setaf 2)"
   red="$(tput setaf 1)"
   reset="$(tput sgr0)"
 fi
 
+# Redirect stderr to a temporary file so we can return it upon error.
+# In *nix, any command run in this context or one `fork`ed from it,
+#   e.g. subshells, command substitutions, process substitutions, etc,
+#   will inherit this context, including the redirected file descriptor
+# That is, everything run in this script will redirect stderr to this file
+#   unless explicitly redirected as part of the command
 _tmp="$(mktemp)"
 exec 2>>"$_tmp"
 
