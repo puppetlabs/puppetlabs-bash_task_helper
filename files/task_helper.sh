@@ -10,7 +10,7 @@ fail() {
     echo "{ \"status\": \"error\", \"message\": \"$1\" }"
   fi
 
-  exit ${2:-1}
+  exit "${2:-1}"
 }
 
 success() {
