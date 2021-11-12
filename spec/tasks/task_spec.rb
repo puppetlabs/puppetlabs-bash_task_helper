@@ -10,9 +10,9 @@ describe 'bash_task_helper' do
 
       # Get the path to the task based on the absolute path of this file
       task = File.join(File.dirname(__FILE__), '../../examples/mytask.sh')
-      out = %x[#{task}]
+      out = `#{task}`
       # Success for this task is essentially determined by if we get a valid JSON object back
-      expect(['error', 'success'].include? out['status'])
+      expect(['error', 'success'].include?(out['status']))
     }
   end
 end
