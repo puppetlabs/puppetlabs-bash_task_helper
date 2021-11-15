@@ -1,0 +1,2 @@
+This file is to allow the root folder "manifests" to be checked into the module repo
+The Command `pdk release prep` requires the folder to be present

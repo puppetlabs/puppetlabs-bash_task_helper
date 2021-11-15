@@ -2,9 +2,9 @@
   "name": "puppetlabs-bash_task_helper",
   "version": "0.1.0",
   "author": "puppetlabs",
-  "summary": "",
+  "summary": "A Bash helper library for use by Puppet Tasks.",
   "license": "Apache-2.0",
-  "source": "",
+  "source": "https://github.com/puppetlabs/puppetlabs-bash_task_helper",
   "dependencies": [
 
   ],
