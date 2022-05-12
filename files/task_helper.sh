@@ -106,11 +106,36 @@ success() {
 # Examples
 #
 #   task-output "message" "an armadilo crossed the street"
-#   task-output "maximum" "100"
+#   task-output "maximum" "100GB"
 #
 task-output() {
   local -r key="${1}"
   local -r value=$(echo -n "$2" | task-json-escape)
+
+  task-output-json "$key" "$value"
+}
+
+# Public: Set a task output key to a pre-formed valid JSON value
+#
+# Takes a key argument and a value argument, and ensures that upon task exit
+# the key and value will be returned as part of the task output. Unlike
+# task-output, this function requires the USER to ensure that the given value
+# is valid JSON. This is an advanced-user utility. Failure to pass valid JSON
+# will result in malformed task output being produced.
+#
+# $1 - Output key. Should contain only characters that match [A-Za-z0-9-_]
+# $2 - Output value. Should be pre-formatted, valid JSON.
+#
+# Examples
+#
+#   task-output-json "number" 42
+#   task-output-json "string" '"str"'
+#   task-output-json "object" '{"one": "two"}'
+#   task-output-json "array" '["zero", "one", "two"]'
+#
+task-output-json() {
+  local -r key="${1}"
+  local -r value="${2}"
 
   # Try to find an index for the key
   for i in "${!_task_output_keys[@]}"; do
@@ -125,6 +150,7 @@ task-output() {
     _task_output_values=("${_task_output_values[@]}" "${value}")
   fi
 }
+
 
 # Public: Set the task to always return full output
 #
