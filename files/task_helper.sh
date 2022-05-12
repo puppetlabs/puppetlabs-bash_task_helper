@@ -62,7 +62,7 @@
 task-fail() {
   task-output "status" "error"
   _task_exit_string="$1"
-  task-exit ${2:-1}
+  task-exit "${2:-1}"
 }
 
 # DEPRECATED
@@ -109,8 +109,8 @@ success() {
 #   task-output "maximum" "100"
 #
 task-output() {
-  local key="${1}"
-  local value=$(echo -n "$2" | task-json-escape)
+  local -r key="${1}"
+  local -r value=$(echo -n "$2" | task-json-escape)
 
   # Try to find an index for the key
   for i in "${!_task_output_keys[@]}"; do
@@ -195,8 +195,7 @@ task-json-escape() {
 #
 task-exit() {
   # Record the exit code
-  local exit_code=${1:-$?}
-  local output
+  local -r exit_code=${1:-$?}
 
   # Unset the trap
   trap - EXIT
@@ -206,11 +205,11 @@ task-exit() {
   # to task-succeed, that will still be returned as _output. If the task does
   # not exit successfully, or if the task is running in verbose mode, then full
   # output is returned (including a task-fail user message, if there is one)
-  if [ "$exit_code" -ne 0 -o "$_task_verbose_output" = 'true' ]; then
+  if [[ "$exit_code" -ne 0 || "$_task_verbose_output" = 'true' ]]; then
     # Print the exit string, then set _output to everything that the script has printed
     echo -n "$_task_exit_string"
     task-output '_output' "$(cat "${_output_tmpfile}")"
-  elif [ ! -z "$_task_exit_string" ]; then
+  elif [ -n "$_task_exit_string" ]; then
     # Set _output to just the exit string
     task-output '_output' "${_task_exit_string}"
   fi
@@ -225,7 +224,7 @@ task-exit() {
     # Print each key-value pair
     printf '  "%s": "%s"' "${_task_output_keys[$i]}" "${_task_output_values[$i]}"
     # Print a comma unless it's the last key-value
-    [ ! "$(($i + 1))" -eq "${#_task_output_keys[@]}" ] && printf ','
+    [ ! "$((i + 1))" -eq "${#_task_output_keys[@]}" ] && printf ','
     # Print a newline
     printf '\n'
   done
