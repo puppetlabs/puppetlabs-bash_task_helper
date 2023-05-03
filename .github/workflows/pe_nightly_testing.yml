@@ -30,6 +30,7 @@ jobs:
 
   Acceptance:
     name: "Nightly"
+    if: github.repository != 'puppetlabs/bash_task_helper' || github.repository != 'puppetlabs/puppetlabs-puppet_operations_appliance'
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
