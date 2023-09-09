@@ -113,7 +113,7 @@ task-output() {
   local -r key="${1}"
   local -r value=$(echo -n "$2" | task-json-escape)
 
-  task-output-json "$key" "$value"
+  task-output-json "$key" "\"$value\""
 }
 
 # Public: Set a task output key to a pre-formed valid JSON value
@@ -251,7 +251,7 @@ task-exit() {
   printf '{\n'
   for i in "${!_task_output_keys[@]}"; do
     # Print each key-value pair
-    printf '  "%s": "%s"' "${_task_output_keys[$i]}" "${_task_output_values[$i]}"
+    printf '  "%s": %s' "${_task_output_keys[$i]}" "${_task_output_values[$i]}"
     # Print a comma unless it's the last key-value
     [ ! "$((i + 1))" -eq "${#_task_output_keys[@]}" ] && printf ','
     # Print a newline
