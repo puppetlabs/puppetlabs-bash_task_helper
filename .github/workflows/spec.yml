@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Remove puppetlabs- prefix
         env:
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ github.repository }}
         id: remove_prefix
         run: echo "::set-output name=repo_name::${BRANCH/#*puppetlabs-}"
 
