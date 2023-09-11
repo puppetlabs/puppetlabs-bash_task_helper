@@ -185,13 +185,15 @@ task-json-escape() {
   # way to get iconv to catch more character types, we might improve that.
   # 1. Replace backslashes with escape sequences
   # 2. Replace unicode characters (if possible) with system iconv
+  #    Note that older iconv versions do not have --unicode-subst
+  #    and will emit an error on stderr when it is used.
   # 3. Replace other required characters with escape sequences
   #    Note that this includes two control-characters specifically
   # 4. Escape newlines (1/2): Replace all newlines with literal tabs
   # 5. Escape newlines (2/2): Replace all literal tabs with newline escape sequences
   # 6. Delete any remaining non-printable lines from the stream
   sed -e 's/\\/\\/g' \
-    | { iconv -t ASCII --unicode-subst="\u%04x" || cat; } \
+    | { iconv -t ASCII --unicode-subst="\u%04x" 2>/dev/null || cat; } \
     | sed -e 's/"/\\"/g' \
           -e 's/\//\\\//g' \
           -e "s/$(printf '\b')/\\\b/g" \
