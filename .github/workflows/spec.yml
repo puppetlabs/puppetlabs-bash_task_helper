@@ -44,12 +44,14 @@ jobs:
 
       - name: Setup Spec Test Matrix
         id: get-matrix
+        working-directory: ./${{ steps.remove_prefix.outputs.repo_name }}
         run: |
           if [ '${{ github.repository_owner }}' == 'puppetlabs' ]; then
           bundle exec matrix_from_metadata_v2
           else
             echo  "spec_matrix={}" >> $GITHUB_OUTPUT
           fi
+
 
   Spec:
     name: "Spec Tests (Puppet: ${{matrix.puppet_version}}, Ruby Ver: ${{matrix.ruby_version}})"
