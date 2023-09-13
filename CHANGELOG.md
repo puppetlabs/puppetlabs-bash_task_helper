@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v2.1.0](https://github.com/puppetlabs/puppetlabs-bash_task_helper/tree/v2.1.0) (2023-09-13)
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-bash_task_helper/compare/v2.0.0...v2.1.0)
+
+### Added
+
+- \(maint\) Document helper functions in README, update example [\#15](https://github.com/puppetlabs/puppetlabs-bash_task_helper/pull/15) ([beechtom](https://github.com/beechtom))
+
+### Fixed
+
+- Fix task-output-json to work as documented [\#21](https://github.com/puppetlabs/puppetlabs-bash_task_helper/pull/21) ([seanmil](https://github.com/seanmil))
+- Handle missing iconv option gracefully [\#20](https://github.com/puppetlabs/puppetlabs-bash_task_helper/pull/20) ([seanmil](https://github.com/seanmil))
+
+### UNCATEGORIZED PRS; LABEL THEM ON GITHUB
+
+- \(SUP-4198\) Puppet 8 release prep [\#16](https://github.com/puppetlabs/puppetlabs-bash_task_helper/pull/16) ([elainemccloskey](https://github.com/elainemccloskey))
+
 ## [v2.0.0](https://github.com/puppetlabs/puppetlabs-bash_task_helper/tree/v2.0.0) (2022-07-11)
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-bash_task_helper/compare/v1.0.0...v2.0.0)
