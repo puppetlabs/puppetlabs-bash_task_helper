@@ -192,7 +192,7 @@ task-json-escape() {
   # 4. Escape newlines (1/2): Replace all newlines with literal tabs
   # 5. Escape newlines (2/2): Replace all literal tabs with newline escape sequences
   # 6. Delete any remaining non-printable lines from the stream
-  sed -e 's/\\/\\/g' \
+  sed -e 's/\\/\\\\/g' \
     | { iconv -t ASCII --unicode-subst="\u%04x" 2>/dev/null || cat; } \
     | sed -e 's/"/\\"/g' \
           -e 's/\//\\\//g' \

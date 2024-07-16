@@ -15,7 +15,8 @@ elif [ "$run_type" == 'output' ]; then
   task-output-json "string2" '"abcd"'
   task-output-json "number" 42
   task-output-json "bool" true
-  task-output "complex-string" "This is a \"complex string\".\n\tSecond line."
+  task-output "complex-string" $'This is a "complex string".\n\tSecond line.'
+  task-output "escape-backslash" "\\ No newline"
 fi
 
 task-succeed
