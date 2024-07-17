@@ -42,6 +42,7 @@ describe 'bash_task_helper' do
       it { is_expected.to include('number' => 42) }
       it { is_expected.to include('bool' => true) }
       it { is_expected.to include('complex-string' => "This is a \"complex string\".\n\tSecond line.") }
+      it { is_expected.to include('escape-backslash' => '\ No newline') }
     end
   end
 end
