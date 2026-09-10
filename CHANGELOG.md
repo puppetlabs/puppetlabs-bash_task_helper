@@ -13,10 +13,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - (BOLT-193) bash_task_helper pdk update to puppet 9 [#37](https://github.com/puppetlabs/puppetlabs-bash_task_helper/pull/37) ([gavindidrichsen](https://github.com/gavindidrichsen))
 
-### Other
-
-- CHANGELOG update [#38](https://github.com/puppetlabs/puppetlabs-bash_task_helper/pull/38) ([gavindidrichsen](https://github.com/gavindidrichsen))
-
 ## [v2.2.0](https://github.com/puppetlabs/puppetlabs-bash_task_helper/tree/v2.2.0) - 2025-01-09
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-bash_task_helper/compare/v2.1.1...v2.2.0)
