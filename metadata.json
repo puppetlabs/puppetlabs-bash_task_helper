@@ -5,9 +5,7 @@
   "summary": "A Bash helper library for use by Puppet Tasks.",
   "license": "Apache-2.0",
   "source": "https://github.com/puppetlabs/puppetlabs-bash_task_helper",
-  "dependencies": [
-
-  ],
+  "dependencies": [],
   "operatingsystem_support": [
     {
       "operatingsystem": "CentOS",
