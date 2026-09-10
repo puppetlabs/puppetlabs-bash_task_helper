@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org).
 
+## [v3.0.0](https://github.com/puppetlabs/puppetlabs-bash_task_helper/tree/v3.0.0) - 2026-09-10
+
+[Full Changelog](https://github.com/puppetlabs/puppetlabs-bash_task_helper/compare/v2.2.0...v3.0.0)
+
+### Changed
+
+- (BOLT-193) Raise puppet requirement to `>= 8.0.0 < 10.0.0` for the Puppet 9 migration, dropping puppet 7 support. Breaking change to the supported-platform contract, hence the major version bump.
+
 ## [v2.2.0](https://github.com/puppetlabs/puppetlabs-bash_task_helper/tree/v2.2.0) - 2025-01-09
 
 [Full Changelog](https://github.com/puppetlabs/puppetlabs-bash_task_helper/compare/v2.1.1...v2.2.0)
